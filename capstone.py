@@ -10,14 +10,21 @@ This file contains:
 5. Experiments validating the paper's convergence theorem
 """
 
+
+# Bellman
+# Q*(s, a) = Σ_{s'} P(s'|s,a) · [R(s,a,s') + γ · max_{a'} Q*(s', a')]
+
+# Q Learning
+# Q(s, a) ← Q(s, a) + α · [r + γ · max_{a'} Q(s', a') - Q(s, a)]
+
+# Q-learning: target = r + γ · max_{a'} Q(s', a')     ← best possible
+# SARSA:      target = r + γ · Q(s', a'_actual)        ← what actually happened
+
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import defaultdict
 import gymnasium as gym
 
-# =============================================================================
-# 1. CUSTOM GRIDWORLD ENVIRONMENT
-# =============================================================================
 
 class GridWorld:
     """
@@ -562,8 +569,8 @@ def experiment_1_convergence():
 
     plt.suptitle('Experiment 1: Validating Convergence Theorem', fontsize=14)
     plt.tight_layout()
-    plt.savefig('exp1_convergence.png', dpi=150)
-    plt.show()
+    plt.savefig('plots/exp1_convergence.png', dpi=150)
+    # plt.show()
 
     print(f"\nFinal max error (mean ± std): {mean_error[-1]:.6f} ± {std_error[-1]:.6f}")
     print(f"Final mean error: {mean_mean_err[-1]:.6f}")
@@ -606,7 +613,7 @@ def experiment_2_learning_rates():
     n_seeds = 10
 
     configs = [
-        ("α = 1/n^0.6 (decaying)", "decay", 0.0),
+        ("α = c/(c+n) (decaying)", "decay", 0.0),
         ("α = 0.1 (fixed)", "fixed", 0.1),
         ("α = 0.01 (fixed)", "fixed", 0.01),
     ]
@@ -639,8 +646,8 @@ def experiment_2_learning_rates():
     ax.set_yscale('log')
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig('exp2_learning_rates.png', dpi=150)
-    plt.show()
+    plt.savefig('plots/exp2_learning_rates.png', dpi=150)
+    # plt.show()
 
 
 # =============================================================================
@@ -711,8 +718,8 @@ def experiment_3_exploration():
 
     plt.suptitle('Experiment 3: Effect of Exploration Strategy', fontsize=14)
     plt.tight_layout()
-    plt.savefig('exp3_exploration.png', dpi=150)
-    plt.show()
+    plt.savefig('plots/exp3_exploration.png', dpi=150)
+    # plt.show()
 
 
 # =============================================================================
@@ -761,8 +768,8 @@ def experiment_4_discount():
     ax.set_yscale('log')
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig('exp4_discount.png', dpi=150)
-    plt.show()
+    plt.savefig('plots/exp4_discount.png', dpi=150)
+    # plt.show()
 
 
 # =============================================================================
@@ -825,8 +832,8 @@ def experiment_5_qlearning_vs_sarsa():
     ax.legend()
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig('exp5_ql_vs_sarsa.png', dpi=150)
-    plt.show()
+    plt.savefig('plots/exp5_ql_vs_sarsa.png', dpi=150)
+    # plt.show()
 
     # Print learned policies
     print("\nQ-learning learned policy (CliffWalking 4x12 grid):")
@@ -959,12 +966,107 @@ def experiment_6_overestimation():
     ax.legend()
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig('exp6_overestimation.png', dpi=150)
-    plt.show()
+    plt.savefig('plots/exp6_overestimation.png', dpi=150)
+    # plt.show()
 
     print(f"\nFinal mean overestimation (Q - Q*):")
     print(f"  Q-learning:        {np.mean(ql_overest_all):.6f}")
     print(f"  Double Q-learning: {np.mean(dql_overest_all):.6f}")
+
+
+
+
+
+# =============================================================================
+# EXPERIMENT 6: Q-Learning on FrozenLake (Stochastic Environment)
+# =============================================================================
+
+def experiment_6_frozenlake():
+    """
+    Test Q-learning convergence on a stochastic environment.
+    FrozenLake has slippery transitions — when you choose an action,
+    the environment may move you in a different direction with some
+    probability. This tests whether Q-learning still converges when
+    transitions are noisy.
+
+    Double Q-learning comparison is planned as a future extension.
+    """
+    print("=" * 60)
+    print("EXPERIMENT 6: Q-Learning on FrozenLake (Stochastic)")
+    print("=" * 60)
+
+    # Compute Q* for FrozenLake
+    env_temp = gym.make("FrozenLake-v1", is_slippery=True)
+    P_frozen = env_temp.unwrapped.P
+    n_states_fl = env_temp.observation_space.n
+    n_actions_fl = env_temp.action_space.n
+
+    # Value iteration on FrozenLake
+    Q_star = np.zeros((n_states_fl, n_actions_fl))
+    gamma = 0.99
+    for iteration in range(10000):
+        Q_new = np.zeros_like(Q_star)
+        for s in range(n_states_fl):
+            for a in range(n_actions_fl):
+                for prob, ns, reward, done in P_frozen[s][a]:
+                    if done:
+                        Q_new[s, a] += prob * reward
+                    else:
+                        Q_new[s, a] += prob * (reward + gamma * np.max(Q_star[ns]))
+        if np.max(np.abs(Q_new - Q_star)) < 1e-10:
+            print(f"FrozenLake value iteration converged in {iteration+1} iterations")
+            break
+        Q_star = Q_new
+
+    print(f"Q* computed. Max Q*: {Q_star.max():.4f}")
+
+    n_episodes = 50000
+    n_seeds = 10
+
+    all_errors = []
+    all_rewards = []
+
+    for seed in range(n_seeds):
+        np.random.seed(seed)
+        env = gym.make("FrozenLake-v1", is_slippery=True)
+        _, metrics = q_learning(
+            env, n_episodes=n_episodes, gamma=gamma,
+            alpha_mode="decay", epsilon_mode="decay", Q_star=Q_star
+        )
+        all_errors.append(metrics["q_errors"])
+        all_rewards.append(metrics["rewards"])
+
+    errors = np.array(all_errors)
+    rewards = np.array(all_rewards)
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+    # Q-value error
+    smoothed_err = smooth(errors.mean(axis=0), 500)
+    ax1.plot(smoothed_err, color='blue', linewidth=1.5)
+    ax1.set_xlabel('Episode')
+    ax1.set_ylabel('||Q_n - Q*||∞ (smoothed)')
+    ax1.set_title('Q-Value Convergence on FrozenLake')
+    ax1.grid(True, alpha=0.3)
+
+    # Reward (success rate — FrozenLake gives +1 only on reaching goal)
+    smoothed_rew = smooth(rewards.mean(axis=0), 500)
+    ax2.plot(smoothed_rew, color='green', linewidth=1.5)
+    ax2.set_xlabel('Episode')
+    ax2.set_ylabel('Reward per Episode (smoothed)')
+    ax2.set_title('Success Rate on FrozenLake')
+    ax2.grid(True, alpha=0.3)
+
+    plt.suptitle('Experiment 6: Q-Learning in a Stochastic Environment', fontsize=14)
+    plt.tight_layout()
+    plt.savefig('plots/exp6_frozenlake.png', dpi=150)
+    # plt.show()
+
+    print(f"\nFinal Q-error (mean across seeds): {errors.mean(axis=0)[-1]:.4f}")
+    print(f"Final success rate (last 1000 eps): {rewards.mean(axis=0)[-1000:].mean():.4f}")
+
+
+
 
 
 # =============================================================================
@@ -1004,8 +1106,8 @@ def experiment_7_scalability():
     ax.set_title('Experiment 7: Q-Learning on Taxi-v3 (500 states)')
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig('exp7_taxi.png', dpi=150)
-    plt.show()
+    plt.savefig('plots/exp7_taxi.png', dpi=150)
+    # plt.show()
 
     print(f"\nFinal avg reward (last 1000 episodes): {mean_rewards[-1000:].mean():.2f}")
 
@@ -1048,8 +1150,8 @@ def visualize_q_values(Q, Q_star, size=4):
 
     plt.suptitle('Q-Value Heatmap Comparison', fontsize=14)
     plt.tight_layout()
-    plt.savefig('q_value_heatmap.png', dpi=150)
-    plt.show()
+    plt.savefig('plots/q_value_heatmap.png', dpi=150)
+    # plt.show()
 
 
 def visualize_policy(Q, size=4):
@@ -1077,8 +1179,8 @@ def visualize_policy(Q, size=4):
     ax.grid(True)
     ax.set_title('Learned Policy')
     plt.tight_layout()
-    plt.savefig('learned_policy.png', dpi=150)
-    plt.show()
+    plt.savefig('plots/learned_policy.png', dpi=150)
+    # plt.show()
 
 
 # =============================================================================
@@ -1097,7 +1199,7 @@ if __name__ == "__main__":
     experiment_3_exploration()
     experiment_4_discount()
     experiment_5_qlearning_vs_sarsa()
-    experiment_6_overestimation()
+    experiment_6_frozenlake()
     experiment_7_scalability()
 
     # Generate visualizations for the presentation
