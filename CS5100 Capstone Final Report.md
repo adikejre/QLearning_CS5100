@@ -1,7 +1,7 @@
 # Empirical Validation of Q-Learning Convergence
 
 **CS5100 — Foundations of Artificial Intelligence, Spring 2026**
-**Student:** Aditya
+**Student:** Aditya Kejrewal
 
 ## Video Link:
 [Sharepoint Link](https://northeastern-my.sharepoint.com/:v:/g/personal/kejrewal_a_northeastern_edu/IQALVcbPgaeUR4tSL4KswSFFAa8_zACzB0oNQDVbDWOGYos?e=fPVTRU&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D)
@@ -145,8 +145,16 @@ The max error remained around 0.1. Debugging revealed this was driven entirely b
 
 The Q-value heatmap comparison showed the learned V(s) = max_a Q(s,a) was visually indistinguishable from V*(s), with maximum per-state error of 0.00016.
 
-[Figure 1: Experiment 1 convergence plot — mean error, max error, and policy correctness]
-[Figure 2: Q-value heatmap — learned vs. optimal vs. difference]
+<figure>
+  <img src="plots\exp1_convergence.png" alt="Description">
+  <figcaption>Figure 1: Experiment 1 convergence plot — mean error, max error, and policy correctness</figcaption>
+</figure>
+
+<figure>
+  <img src="plots\q_value_heatmap.png" alt="Description">
+  <figcaption>Figure 2: Q-value heatmap — learned vs. optimal vs. difference</figcaption>
+</figure>
+
 
 ### Experiment 2: Learning Rate Conditions
 
@@ -154,7 +162,11 @@ The decaying learning rate achieved the lowest final error. Fixed α = 0.1 conve
 
 This validates the theorem's learning rate conditions. The decaying schedule satisfies both Σα = ∞ and Σα² < ∞, while fixed rates violate Σα² < ∞ and produce permanent oscillation.
 
-[Figure 3: Experiment 2 — learning rate comparison]
+<figure>
+  <img src="plots\exp2_learning_rates.png" alt="Description">
+  <figcaption>Figure 3: Experiment 2 — learning rate comparison</figcaption>
+</figure>
+
 
 ### Experiment 3: Exploration Conditions
 
@@ -162,13 +174,22 @@ Decaying ε-greedy achieved the lowest error. Pure greedy (ε = 0) performed wor
 
 This validates the infinite visitation condition: without sufficient exploration, convergence fails.
 
-[Figure 4: Experiment 3 — exploration strategy comparison]
+<figure>
+  <img src="plots\exp3_exploration.png" alt="Description">
+  <figcaption>Figure 4: Experiment 3 — exploration strategy comparison</figcaption>
+</figure>
+
 
 ### Experiment 4: Discount Factor
 
 Lower γ values converged faster and to lower error. γ = 0.1 reached error ~0.00004 quickly, while γ = 0.99 plateaued around 0.1. This is expected: lower γ means Q-values are smaller (less to learn) and the agent focuses on near-term rewards (simpler problem). All curves decreased, confirming the theorem holds for any γ < 1.
 
-[Figure 5: Experiment 4 — discount factor comparison]
+<figure>
+  <img src="plots\exp5_ql_vs_sarsa.png" alt="Description">
+  <figcaption>Figure 5: Experiment 4 — discount factor comparison</figcaption>
+</figure>
+
+
 
 ### Experiment 5: Q-Learning vs. SARSA
 
@@ -176,19 +197,31 @@ On CliffWalking, SARSA achieved higher average reward during training (~-20 per 
 
 This occurs because Q-learning is off-policy: its update uses max (assuming optimal play), so it values the cliff-edge path highest. But during execution with ε = 0.1, random actions occasionally step off the cliff. SARSA is on-policy: it uses the actual next action in its update, so random cliff-falls directly lower the Q-values near the cliff, causing SARSA to learn the safer path.
 
-[Figure 6: Experiment 5 — Q-learning vs. SARSA reward curves]
+<figure>
+  <img src="plots\exp6_frozenlake.png" alt="Description">
+  <figcaption>Figure 6: Experiment 5 — Q-learning vs. SARSA reward curves</figcaption>
+</figure>
+
 
 ### Experiment 6: FrozenLake (Stochastic)
 
 Q-learning's error decreased on FrozenLake but more slowly and with more noise than on deterministic GridWorld. This is expected: stochastic transitions mean each sample provides noisier information about the true transition probabilities, requiring more episodes for the Q-values to stabilize.
 
-[Figure 7: Experiment 6 — FrozenLake convergence]
+<figure>
+  <img src="plots\exp7_taxi.png" alt="Description">
+  <figcaption>Figure 7: Experiment 6 — FrozenLake convergence</figcaption>
+</figure>
+
 
 ### Experiment 7: Scalability
 
 On Taxi-v3, reward climbed from approximately -150 (random behavior) to +7 (successful taxi trips) over 50,000 episodes. This demonstrates Q-learning works on a state space more than 30x larger than GridWorld, though convergence takes proportionally more episodes.
 
-[Figure 8: Experiment 7 — Taxi-v3 learning curve]
+<figure>
+  <img src="plots\exp7_taxi.png" alt="Description">
+  <figcaption>Figure 8: Experiment 7 — Taxi-v3 learning curve</figcaption>
+</figure>
+
 
 ## 7. Analysis and Discussion
 
