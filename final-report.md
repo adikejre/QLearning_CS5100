@@ -3,7 +3,8 @@
 **CS5100 — Foundations of Artificial Intelligence, Spring 2026**
 **Student:** Aditya
 
-## Video Link: 
+## Video Link:
+[Sharepoint Link](https://northeastern-my.sharepoint.com/:v:/g/personal/kejrewal_a_northeastern_edu/IQALVcbPgaeUR4tSL4KswSFFAa8_zACzB0oNQDVbDWOGYos?e=fPVTRU&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D)
 
 ---
 
