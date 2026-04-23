@@ -7,6 +7,9 @@
 ## Video Link:
 [Sharepoint Link](https://northeastern-my.sharepoint.com/:v:/g/personal/kejrewal_a_northeastern_edu/IQALVcbPgaeUR4tSL4KswSFFAa8_zACzB0oNQDVbDWOGYos?e=fPVTRU&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D)
 
+## Repository Link:
+[Github Link](https://github.com/adikejre/QLearning_CS5100/tree/main)
+
 ---
 
 ## 1. Introduction
@@ -269,8 +272,4 @@ Watkins, C. J. C. H., & Dayan, P. (1992). Q-learning. *Machine Learning*, 8, 279
 
 Watkins, C. J. C. H. (1989). *Learning from Delayed Rewards*. PhD Thesis, University of Cambridge.
 
-Sutton, R. S., & Barto, A. G. (2018). *Reinforcement Learning: An Introduction* (2nd ed.). MIT Press.
-
 van Hasselt, H. (2010). Double Q-learning. *Advances in Neural Information Processing Systems*, 23.
-
-Kushner, H. & Clark, D. (1978). *Stochastic Approximation Methods for Constrained and Unconstrained Systems*. Springer-Verlag.
